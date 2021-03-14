@@ -1,11 +1,41 @@
 import { Icon } from 'antd'
-import React from 'react'
+import Axios from 'axios'
+import React, { useState } from 'react'
 import Dropzone from 'react-dropzone'
 
-function FileUpload() {
+function FileUpload(props) {
+  const [Images, setImages] = useState([])
+
+  const onDrop = files => {
+    let formData = new FormData()
+    const config = {
+      header: { 'content-type': 'multipart/form-data' }
+    }
+    formData.append('file', files[0])
+
+    Axios.post('/api/product/uploadImage', formData, config).then(response => {
+      if (response.data.success) {
+        setImages([...Images, response.data.image])
+        props.refreshFunction([...Images, response.data.image])
+      } else {
+        alert('Faled to save the Image in Server')
+      }
+    })
+  }
+
+  const onDelete = image => {
+    const currentIndex = Images.indexOf(image)
+
+    let newImages = [...Images]
+    newImages.splice(currentIndex, 1)
+
+    setImages(newImages)
+    props.refreshFunction(newImages)
+  }
+
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-      <Dropzone onDrop multiple maxSize>
+      <Dropzone onDrop={onDrop} multiple={false}>
         {({ getRootProps, getInputProps }) => (
           <div
             style={{
@@ -13,14 +43,42 @@ function FileUpload() {
               height: '240px',
               border: '1px solid lightgray',
               display: 'flex',
-              alignItems: 'center'
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
-            {...getInputProps()}>
+            {...getRootProps()}
+          >
             <input {...getInputProps()} />
             <Icon type='plus' style={{ fontSize: '3rem' }} />
           </div>
         )}
       </Dropzone>
+
+      <div
+        style={{
+          display: 'flex',
+          width: '350px',
+          height: '240px',
+          overflowX: 'scroll',
+          overflowY: 'hidden'
+        }}
+      >
+        {Images.map((image, index) => {
+          return (
+            <div onClick={() => onDelete(image)} key={image}>
+              <img
+                style={{
+                  minWidth: 300,
+                  width: 300,
+                  height: 240
+                }}
+                src={`http://localhost:5000/${image}`}
+                alt={`productImg-${index}`}
+              />
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
