@@ -1,13 +1,13 @@
 import { Collapse, Radio } from 'antd'
 import CollapsePanel from 'antd/lib/collapse/CollapsePanel'
 import React, { useState } from 'react'
-import { price } from './Datas'
 
 function RadioBox(props) {
   const [Value, setValue] = useState('0')
 
   const renderRadioBox = () =>
-    price.map(value => (
+    props.list &&
+    props.list.map(value => (
       <Radio key={value._id} value={value._id}>
         {value.name}
       </Radio>

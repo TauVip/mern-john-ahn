@@ -4,13 +4,16 @@ import Axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import ImageSlider from '../../utils/ImageSlider'
 import CheckBox from './Sections/CheckBox'
+import { continents, price } from './Sections/Datas'
 import RadioBox from './Sections/RadioBox'
+import SearchFeature from './Sections/SearchFeature'
 
 function LandingPage() {
   const [Products, setProducts] = useState([])
   const [Skip, setSkip] = useState(0)
   const [Limit, setLimit] = useState(8)
   const [PostSize, setPostSize] = useState(0)
+  const [SearchTerm, setSearchTerms] = useState('')
   const [Filters, setFilters] = useState({
     continents: [],
     price: []
@@ -57,7 +60,13 @@ function LandingPage() {
   const renderCards = Products.map((product, index) => {
     return (
       <Col lg={6} md={8} xs={24} key={index}>
-        <Card hoverable cover={<ImageSlider images={product.images} />}>
+        <Card
+          hoverable
+          cover={
+            <a href={`/product/${product._id}`}>
+              <ImageSlider images={product.images} />
+            </a>
+          }>
           <Meta title={product.title} description={`$${product.price}`} />
         </Card>
       </Col>
@@ -74,7 +83,17 @@ function LandingPage() {
     setSkip(0)
   }
 
-  const handlePrice = value => {}
+  const handlePrice = value => {
+    const data = price
+    let array = []
+
+    for (let key in data) {
+      if (data[key]._id === parseInt(value, 10)) {
+        array = data[key].array
+      }
+    }
+    return array
+  }
 
   const handleFilters = (filters, category) => {
     const newFilters = { ...Filters }
@@ -83,10 +102,25 @@ function LandingPage() {
 
     if (category === 'price') {
       let priceValues = handlePrice(filters)
+      newFilters[category] = priceValues
     }
 
     showFilteredResults(newFilters)
     setFilters(newFilters)
+  }
+
+  const updateSearchTerms = newSearchTerm => {
+    const variables = {
+      skip: 0,
+      limit: Limit,
+      filters: Filters,
+      searchTerm: newSearchTerm
+    }
+
+    setSkip(0)
+    setSearchTerms(newSearchTerm)
+
+    getProducts(variables)
   }
 
   return (
@@ -100,15 +134,26 @@ function LandingPage() {
       <Row gutter={[16, 16]}>
         <Col lg={12} xs={24}>
           <CheckBox
+            list={continents}
             handleFilters={filters => handleFilters(filters, 'continents')}
           />
         </Col>
         <Col lg={12} xs={24}>
           <RadioBox
+            list={price}
             handleFilters={filters => handleFilters(filters, 'price')}
           />
         </Col>
       </Row>
+
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          margin: '1rem auto'
+        }}>
+        <SearchFeature refreshFunction={updateSearchTerms} />
+      </div>
 
       {Products.length === 0 ? (
         <div
@@ -117,8 +162,7 @@ function LandingPage() {
             height: '300px',
             justifyContent: 'center',
             alignItems: 'center'
-          }}
-        >
+          }}>
           <h2>No post yet...</h2>
         </div>
       ) : (
