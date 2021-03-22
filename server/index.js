@@ -45,4 +45,4 @@ app.listen(port, () => {
   console.log(`Server Running at ${port}`)
 })
 
-// MERN STACK PROJECT - ONLINE SHOP CLONE (SOURCE CODE INCLUDED) (REACT JS) | 2:33:55
+// MERN STACK PROJECT - ONLINE SHOP CLONE (SOURCE CODE INCLUDED) (REACT JS) | 4:21:15
